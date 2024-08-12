@@ -23,9 +23,7 @@ std::string getBalance(std::shared_ptr<drogon::orm::DbClient> dbClient, dpp::gui
 }
 
 void User::getProfile (const dpp::slashcommand_t& event, 
-std::shared_ptr<drogon::orm::DbClient> dbClient) {
-    
-    auto user = event.command.member;
+std::shared_ptr<drogon::orm::DbClient> dbClient, dpp::guild_member& user) {
 
     dpp::embed info = dpp::embed()
         .set_title("Информация о пользователе `" + user.get_user()->global_name + "`")

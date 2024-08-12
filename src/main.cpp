@@ -7,6 +7,8 @@
 
 #include "appcommand.h"
 #include "base.h"
+#include "dispatcher.h"
+#include "guild.h"
 #include "user.h"
  
 int main() {
@@ -29,26 +31,30 @@ int main() {
         }
 
         if (event.command.get_command_name() == "profile") {
-            // std::string value = std::get<std::string>(event.get_parameter("user"));
 
-            // if (value == "") {
-                // value = event.command.usr.id;
-            // }
-            // else {
-            //     value = value.substr(2, 18);
-            // }
+            std::string value = "";
 
-            // bot.user_get(value, [&event, dbClient](const dpp::confirmation_callback_t& callback) {
-            //     if (callback.is_error()) {
-            //         event.reply("Error fetching user: " + callback.get_error().message);
-            //         return;
-            //     }
+            try {
+                value = std::get<std::string>(event.get_parameter("user"));
+                value = value.substr(2, 18);
+            }
+            catch (...) {
+                value = event.command.usr.id.str();
+            }
 
-            //     auto user = std::get<dpp::guild_member>(callback.value);
 
-                User::getProfile(event, dbClient);
+            auto guild = event.command.get_guild();
+
+            bot.guild_get_member(guild.id, value, 
+            [event = std::move(event), dbClient](const dpp::confirmation_callback_t& callback) {
+                if (callback.is_error()) {
+                    std::cerr << "Error fetching user: " << callback.get_error().message << std::endl;
+                } else {
+                    auto fetchedUser = std::get<dpp::guild_member>(callback.value);
+                    User::getProfile(event, dbClient, fetchedUser);
+                }
+            });
                 
-            // });
         }
 
     });
