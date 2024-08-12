@@ -49,6 +49,7 @@ int main() {
             [event = std::move(event), dbClient](const dpp::confirmation_callback_t& callback) {
                 if (callback.is_error()) {
                     std::cerr << "Error fetching user: " << callback.get_error().message << std::endl;
+                    event.reply("Ебать ты пидорас");
                 } else {
                     auto fetchedUser = std::get<dpp::guild_member>(callback.value);
                     User::getProfile(event, dbClient, fetchedUser);
