@@ -10,7 +10,9 @@ public:
     : id(id), balance(balance), joined_at(joined_at)
     {}
 
-    static void getProfile (const dpp::slashcommand_t&, std::shared_ptr<drogon::orm::DbClient>, dpp::guild_member&);  
+    static void getProfile (const dpp::slashcommand_t&, std::shared_ptr<drogon::orm::DbClient>, dpp::guild_member&);
+    static void topUsers (const dpp::slashcommand_t&, std::shared_ptr<drogon::orm::DbClient>);
+    static void getTimely (const dpp::slashcommand_t&, std::shared_ptr<drogon::orm::DbClient>);
 
 private:
     std::string id;
