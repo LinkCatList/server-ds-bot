@@ -1,0 +1,22 @@
+version: "3.9"
+services:
+  postgres:
+    build:
+      dockerfile: db.Dockerfile
+      context: .
+    environment:
+      POSTGRES_DB: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "qwerty"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5428:5432"
+  bot:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    depends_on: 
+      - postgres
+volumes:
+  postgres_data:

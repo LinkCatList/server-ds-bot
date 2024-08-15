@@ -1,11 +1,14 @@
 #include <cstdint>
 #include <ctime>
 #include <dpp/dpp.h>
+#include <random>
 
 #include "user.h"
 #include "base.h"
 #include "colors.h"
 #include "message.h"
+
+std::mt19937 rnd(4321);
 
 void update(std::shared_ptr<drogon::orm::DbClient> dbClient, std::string user_id) {
     auto row = dbClient->execSqlSync("select exists(select 1 from users where id=$1)",
@@ -83,7 +86,7 @@ void User::getTimely(const dpp::slashcommand_t &event, std::shared_ptr<drogon::o
 
 
     int64_t last_get = row[0][0].as<int64_t>();
-    int bonus = 20 + rand() % 30;
+    int bonus = 20 + rnd() % 30;
 
     if (time(NULL) - last_get >= H24_SECONDS) {
         dbClient->execSqlSync("update users set balance=$1, last_get=$2 where id=$3", 
