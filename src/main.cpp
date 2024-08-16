@@ -35,8 +35,8 @@ int main() {
             std::string value = "";
 
             try {
-                value = std::get<std::string>(event.get_parameter("user"));
-                value = value.substr(2, 18);
+                value = std::get<std::string>(event.get_parameter("user"))
+                    .substr(2, 18);
             }
             catch (...) {
                 value = event.command.usr.id.str();
@@ -58,16 +58,19 @@ int main() {
                 
         }
 
+        if (event.command.get_command_name() == "stata") {
+            User::topUsers(event, dbClient);
+        }
+
+        if (event.command.get_command_name() == "bonus") {
+            User::getTimely(event, dbClient);
+        }
     });
 
     bot.on_guild_member_add([&bot, dbClient](const dpp::guild_member_add_t& event){
 
         const dpp::snowflake guild_id = event.adding_guild->id;
         auto user = event.added;
-
-        dbClient->execSqlSync("insert into users values($1)",
-            user.user_id
-        );
 
         bot.message_create(dpp::message(
                 WELCOME_CHANNEL_ID,
@@ -86,7 +89,9 @@ int main() {
             infocommand.add_option(
                 dpp::command_option(dpp::co_string, "user", "The username")
             );
-            bot.global_bulk_command_create({ infocommand, pingcommand});
+            dpp::slashcommand topcommand("stata", "Top users", bot.me.id);
+            dpp::slashcommand bonuscommand("bonus", "Get bonus", bot.me.id);
+            bot.global_bulk_command_create({ infocommand, pingcommand, topcommand, bonuscommand});
         }
     });
 
