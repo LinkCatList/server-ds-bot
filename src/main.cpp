@@ -6,7 +6,6 @@
 
 
 #include "appcommand.h"
-#include "base.h"
 #include "dispatcher.h"
 #include "guild.h"
 #include "user.h"
@@ -65,6 +64,29 @@ int main() {
         if (event.command.get_command_name() == "bonus") {
             User::getTimely(event, dbClient);
         }
+
+        if (event.command.get_command_name() == "transfer") {
+
+            User user(std::to_string(event.command.usr.id));
+            std::string value = std::get<std::string>(event.get_parameter("user"))
+                .substr(2, 18);
+
+            int64_t amount = std::stoi(std::get<std::string>(event.get_parameter("amount")));
+            
+            auto guild = event.command.get_guild();
+
+            bot.guild_get_member(guild.id, value, 
+            [event = std::move(event), dbClient, amount, user = std::move(user)]
+            (const dpp::confirmation_callback_t& callback) {
+                if (callback.is_error()) {
+                    std::cerr << "Error fetching user: " << callback.get_error().message << std::endl;
+                    event.reply("Ебать ты пидорас");
+                } else {
+                    auto fetchedUser = std::get<dpp::guild_member>(callback.value);
+                    user.transferCookie(event, dbClient, fetchedUser, amount);
+                }
+            });
+        }
     });
 
     bot.on_guild_member_add([&bot, dbClient](const dpp::guild_member_add_t& event){
@@ -91,7 +113,14 @@ int main() {
             );
             dpp::slashcommand topcommand("stata", "Top users", bot.me.id);
             dpp::slashcommand bonuscommand("bonus", "Get bonus", bot.me.id);
-            bot.global_bulk_command_create({ infocommand, pingcommand, topcommand, bonuscommand});
+            dpp::slashcommand transfercommand("transfer", "send cookies", bot.me.id);
+            transfercommand.add_option(
+                dpp::command_option(dpp::co_string, "user", "The username", true)
+            );
+            transfercommand.add_option(
+                dpp::command_option(dpp::co_string, "amount", "Amount", true)
+            );
+            bot.global_bulk_command_create({ infocommand, pingcommand, topcommand, bonuscommand, transfercommand});
         }
     });
 
